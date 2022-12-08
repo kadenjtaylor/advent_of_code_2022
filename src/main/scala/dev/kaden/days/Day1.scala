@@ -1,56 +1,53 @@
 package dev.kaden.days
 
 import cats.effect.IO
+import dev.kaden.util.Util.Demo
+import dev.kaden.util.Util.readLines
 
 object Day1 {
 
-  object Part1 {
+  object Part1 extends Demo {
 
     object Domain {
-      case class Elf(snacks: List[Snack]) {
+      case class Elf(snacks: Seq[Snack]) {
         def totalCalories: Int = snacks.map(_.calories).sum
       }
 
       case class Snack(calories: Int)
 
-      private def isEmpty: String => Boolean = _ == ""
-
-      def parseToElfSnacks(lines: List[String]): IO[List[Elf]] = IO {
-        val chunks = Util.split(lines)(isEmpty)
+      def parseToElfSnacks(lines: Seq[String]): IO[Seq[Elf]] = IO {
+        val chunks = Util.split(lines)(Util.isEmpty)
         chunks.map(l => Elf(l.map(s => Snack(Integer.parseInt(s)))))
       }
     }
 
     object Util {
-      def readLines(filename: String): IO[List[String]] = {
-        import scala.io.Source
-        IO {
-          Source.fromFile(filename).getLines().toList
-        }
-      }
 
-      private case class ListAcc[X](done: Option[List[List[X]]], going: List[X]) {
+      def isEmpty: String => Boolean = _ == ""
+
+      private case class SeqAcc[X](done: Option[Seq[Seq[X]]], going: Seq[X]) {
         def value = done.map(_ :+ going).getOrElse(List())
       }
-      def split[X](l: List[X])(pred: X => Boolean) = {
-        val init = ListAcc[X](None, List())
+      // TODO: Rename this to chunk, implement split, and reimplement chunk as split then filter
+      def split[X](l: Seq[X])(pred: X => Boolean) = {
+        val init = SeqAcc[X](None, Seq())
         l.foldLeft(init)((acc, x) => {
           (pred(x), acc) match {
-            case (true, ListAcc(anything, List()))  => ListAcc(anything, List())
-            case (true, ListAcc(None, done))        => ListAcc(Some(List(done)), List())
-            case (true, ListAcc(Some(done), going)) => ListAcc(Some(done :+ going), List())
-            case (false, ListAcc(done, going))      => ListAcc(done, going :+ x)
+            case (true, SeqAcc(anything, Seq()))   => SeqAcc(anything, Seq())
+            case (true, SeqAcc(None, done))        => SeqAcc(Some(Seq(done)), Seq())
+            case (true, SeqAcc(Some(done), going)) => SeqAcc(Some(done :+ going), Seq())
+            case (false, SeqAcc(done, going))      => SeqAcc(done, going :+ x)
           }
         }).value
       }
 
-      def sumOfTopN(ns: List[Int], n: Int) = ns.sorted(Ordering.Int.reverse).take(n)
+      def sumOfTopN(ns: Seq[Int], n: Int) = ns.sorted(Ordering.Int.reverse).take(n)
     }
 
     val n = 3
 
-    def run(): IO[Unit] = for {
-      lines <- Util.readLines("src/main/resources/input/day_1.txt")
+    def run: IO[Unit] = for {
+      lines <- readLines("src/main/resources/input/day_1.txt")
       elves <- Domain.parseToElfSnacks(lines)
       top   <- IO.pure(Util.sumOfTopN(elves.map(_.totalCalories), n))
       _     <- IO.println(s"Top $n: $top")

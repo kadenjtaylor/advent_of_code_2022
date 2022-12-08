@@ -9,6 +9,7 @@ import org.typelevel.log4cats.LoggerFactory
 import dev.kaden.util.Logging.logging
 
 import dev.kaden.days.Day1
+import dev.kaden.days.Day2
 
 object Main extends IOApp.Simple {
 
@@ -16,6 +17,6 @@ object Main extends IOApp.Simple {
 
   // This is your new "main"!
   def run: IO[Unit] = for {
-    greeting <- Day1.Part1.run()
+    greeting <- Day2.run
   } yield ()
 }
