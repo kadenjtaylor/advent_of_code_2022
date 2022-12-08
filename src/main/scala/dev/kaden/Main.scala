@@ -10,6 +10,7 @@ import dev.kaden.util.Logging.logging
 
 import dev.kaden.days.Day1
 import dev.kaden.days.Day2
+import dev.kaden.days.Day3
 
 object Main extends IOApp.Simple {
 
@@ -17,6 +18,6 @@ object Main extends IOApp.Simple {
 
   // This is your new "main"!
   def run: IO[Unit] = for {
-    greeting <- Day2.run
+    greeting <- Day3.run
   } yield ()
 }
